@@ -90,7 +90,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      */
     protected function connect()
     {
-        if(null !== $this->connection)
+        if(null === $this->connection)
         {
             $this->connection = @stream_socket_client( "tcp://{$this->host}:{$this->port}" );
             if ( !$this->connection )

@@ -80,7 +80,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $this->port = $port;
         $this->location = $location;
         $this->inTransaction = 0;
-        $this->connect();
+        $this->connection = null;
     }
 
     /**
@@ -90,10 +90,13 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      */
     protected function connect()
     {
-        $this->connection = @stream_socket_client( "tcp://{$this->host}:{$this->port}" );
-        if ( !$this->connection )
+        if(null !== $this->connection)
         {
-            throw new ezcSearchCanNotConnectException( 'solr', "http://{$this->host}:{$this->port}{$this->location}" );
+            $this->connection = @stream_socket_client( "tcp://{$this->host}:{$this->port}" );
+            if ( !$this->connection )
+            {
+                throw new ezcSearchCanNotConnectException( 'solr', "http://{$this->host}:{$this->port}{$this->location}" );
+            }
         }
     }
 
@@ -108,6 +111,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         // or already be closed. There is no way to check for that properly, so
         // we'll have to use the shut-up operator.
         @fclose( $this->connection );
+        $this->connection = null;
         $this->connect();
     }
 
@@ -155,6 +159,8 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      */
     private function getLine( $maxLength = false )
     {
+        $this->connect();
+        
         $line = ''; $data = '';
         while ( strpos( $line, "\n" ) === false )
         {
@@ -188,6 +194,8 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      */
     public function sendRawGetCommand( $type, $queryString = array() )
     {
+        $this->connect();
+        
         $statusCode = 0;
         $queryPart = '';
         if ( count( $queryString ) )
@@ -277,6 +285,8 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      */
     public function sendRawPostCommand( $type, $queryString, $data )
     {
+        $this->connect();
+        
         $statusCode = 0;
         $reConnect = false;
         $queryPart = '';
@@ -328,8 +338,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         // reconnect if necessary
         if ( $reConnect )
         {
-            fclose( $this->connection );
-            $this->connect();
+            $this->reConnect();
         }
 
         // check http status code

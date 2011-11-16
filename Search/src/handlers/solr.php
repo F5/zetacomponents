@@ -307,6 +307,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
 
         // read http header
         $line = '';
+        $chunked = false;
         while ( $line != "\r\n" )
         {
             $line = $this->getLine();
@@ -323,16 +324,42 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             {
                 $reConnect = true;
             }
+            if ( preg_match( '@Transfer-Encoding: chunked@', $line ) )
+            {
+                $chunked = true;
+            }
         }
 
-        // read http content
-        $size = 1;
         $data = '';
-        while ( $size < $expectedLength )
+        $chunkLength = -1;
+        // read http content with chunked encoding
+        if ( $chunked )
         {
-            $line = $this->getLine( $expectedLength );
-            $size += strlen( $line );
-            $data .= $line;
+            while ( $chunkLength !== 0 )
+            {
+                // fetch chunk length
+                $line = $this->getLine();
+                $chunkLength = hexdec( $line );
+
+                $size = 1;
+                while ( $size < $chunkLength )
+                {
+                    $line = $this->getLine( $chunkLength );
+                    $size += strlen( $line );
+                    $data .= $line;
+                }
+                $line = $this->getLine();
+            }
+        }
+        else // without chunked encoding
+        {
+            $size = 1;
+            while ( $size < $expectedLength )
+            {
+                $line = $this->getLine( $expectedLength );
+                $size += strlen( $line );
+                $data .= $line;
+            }
         }
 
         // reconnect if necessary

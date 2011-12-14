@@ -38,6 +38,7 @@ return array(
     'ezcSearchInvalidResultException'            => 'Search/exceptions/invalid_result.php',
     'ezcSearchNetworkException'                  => 'Search/exceptions/network.php',
     'ezcSearchQueryVariableParameterException'   => 'Search/exceptions/query_variable_parameter.php',
+    'ezcSearchInvalidValueException'             => 'Search/exceptions/invalid_value.php',
     'ezcSearchTransactionException'              => 'Search/exceptions/transaction.php',
     'ezcSearchQuery'                             => 'Search/interfaces/query.php',
     'ezcSearchDefinitionManager'                 => 'Search/interfaces/definition_manager.php',

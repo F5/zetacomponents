@@ -753,6 +753,10 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             case ezcSearchDocumentDefinition::TEXT:
             case ezcSearchDocumentDefinition::HTML:
                 $value = trim( $value );
+                if ( strpbrk( $value, "\\" ) !== false )
+                {
+                    $value = str_replace( '\\', '\\\\', $value );
+                }
                 if ( strpbrk( $value, ' ":' ) !== false )
                 {
                     $value = '"' . str_replace( '"', '\"', $value ) . '"';

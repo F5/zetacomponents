@@ -500,8 +500,9 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         {
             $resultDocument = $this->createDataForHit( $document, $def );
 
+            $state = $resultDocument->document->getState();
             $idProperty = $def->idProperty;
-            $s->documents[$resultDocument->document->$idProperty] = $resultDocument;
+            $s->documents[$state[$idProperty]] = $resultDocument;
         }
 
         // process highlighting

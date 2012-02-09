@@ -392,7 +392,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      * @param array(string=>string) $order
      * @return array
      */
-    private function buildQuery( $queryWord, $defaultField, $searchFieldList = array(), $returnFieldList = array(), $highlightFieldList = array(), $facetFieldList = array(), $limit = null, $offset = false, $order = array() )
+    private function buildQuery( $queryWord, $defaultField, $searchFieldList = array(), $returnFieldList = array(), $highlightFieldList = array(), $facetFieldList = array(), $limit = null, $offset = false, $order = array(),$optionalFlags = array() )
     {
         if ( count( $searchFieldList ) > 0 )
         {
@@ -444,6 +444,9 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         }
         $queryFlags['start'] = $offset;
         $queryFlags['rows'] = $limit === null ? 999999 : $limit;
+
+        $queryFlags = array_merge($optionalFlags,$queryFlags);
+
         return $queryFlags;
     }
 
@@ -581,9 +584,9 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      * @param array(string=>string) $order
      * @return stdClass
      */
-    public function search( $queryWord, $defaultField, $searchFieldList = array(), $returnFieldList = array(), $highlightFieldList = array(), $facetFieldList = array(), $limit = null, $offset = 0, $order = array() )
+    public function search( $queryWord, $defaultField, $searchFieldList = array(), $returnFieldList = array(), $highlightFieldList = array(), $facetFieldList = array(), $limit = null, $offset = 0, $order = array(),$optionalFlags=array() )
     {
-        $result = $this->sendRawGetCommand( 'select', $this->buildQuery( $queryWord, $defaultField, $searchFieldList, $returnFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order ) );
+        $result = $this->sendRawGetCommand( 'select', $this->buildQuery( $queryWord, $defaultField, $searchFieldList, $returnFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$optionalFlags ) );
         if ( ( $data = json_decode( $result ) ) === null )
         {
             throw new ezcSearchInvalidResultException( $result );
@@ -646,8 +649,9 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $limit = $query->limit;
         $offset = $query->offset;
         $order = $query->orderByClauses;
+        $optionalFlags = $query->optionalFlags;
 
-        $res = $this->search( $queryWord, '', array(), $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order );
+        $res = $this->search( $queryWord, '', array(), $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$optionalFlags );
         return $this->createResponseFromData( $query->getDefinition(), $res );
     }
 

@@ -86,6 +86,13 @@ class ezcSearchQuerySolr implements ezcSearchFindQuery
     public $facets;
 
     /**
+     * Holds all the optional flags to send to Solr
+     *
+     * @var array(string)
+     */
+    public $optionalFlags;
+
+    /**
      * Holds the search handler for which this query is built.
      *
      * @var ezcSearchHandler

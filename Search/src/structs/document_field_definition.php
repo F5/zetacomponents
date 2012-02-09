@@ -75,6 +75,13 @@ class ezcSearchDefinitionDocumentField
     public $highlight;
 
     /**
+     * Whether this field should be used for highlighting
+     *
+     * @var bool
+     */
+    public $optional;
+
+    /**
      * Contructs a new ezcSearchDefinitionDocumentField.
      *
      * @param string $field
@@ -83,8 +90,9 @@ class ezcSearchDefinitionDocumentField
      * @param bool $inResult
      * @param bool $multi
      * @param bool $highlight
+     * @param bool $optional
      */
-    public function __construct( $field, $type = ezcSearchDocumentDefinition::TEXT, $boost = 1.0, $inResult = true, $multi = false, $highlight = false )
+    public function __construct( $field, $type = ezcSearchDocumentDefinition::TEXT, $boost = 1.0, $inResult = true, $multi = false, $highlight = false,$optional = false )
     {
         $this->field = $field;
         $this->type = $type;
@@ -92,6 +100,7 @@ class ezcSearchDefinitionDocumentField
         $this->inResult = $inResult;
         $this->multi = $multi;
         $this->highlight = $highlight;
+        $this->optional = $optional;
     }
 
     /**

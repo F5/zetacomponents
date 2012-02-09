@@ -179,7 +179,7 @@ class ezcSearchSession
     {
         foreach ( $def->fields as $field )
         {
-            if ( !array_key_exists( $field->field, $state ) )
+            if ( !array_key_exists( $field->field, $state ) && !$field->optional)
             {
                 throw new ezcSearchIncompleteStateException( $field->field );
             }

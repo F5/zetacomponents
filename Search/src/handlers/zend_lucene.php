@@ -521,6 +521,9 @@ class ezcSearchZendLuceneHandler implements ezcSearchHandler, ezcSearchIndexHand
         $doc->addField( Zend_Search_Lucene_Field::Text( 'ezcsearch_type', $definition->documentType ) );
         foreach ( $definition->fields as $field )
         {
+            // Optional field, verifyState should check that we don't have any non optional field not in the document
+            if(!array_key_exists($field->field,$document)) continue;
+            
             $values = $this->mapFieldValuesForIndex( $field, $document[$field->field] );
             foreach ( $values as $value )
             {

@@ -960,6 +960,9 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
 
         foreach ( $definition->fields as $field )
         {
+            // Optional field, verifyState should check that we don't have any non optional field not in the document
+            if(!array_key_exists($field->field,$document)) continue;
+
             $value = $this->mapFieldValuesForIndex( $field, $document[$field->field] );
             foreach ( $value as $fieldValue )
             {

@@ -200,7 +200,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $queryPart = '';
         if ( count( $queryString ) )
         {
-            $queryPart = '/?'. http_build_query( $queryString );
+            $queryPart = '/?'. $this->httpBuildQuery( $queryString );
         }
         $cmd =  "GET {$this->location}/{$type}{$queryPart} HTTP/1.1\n";
         $cmd .= "Host: {$this->host}:{$this->port}\n";
@@ -292,7 +292,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $queryPart = '';
         if ( count( $queryString ) )
         {
-            $queryPart = '/?'. http_build_query( $queryString );
+            $queryPart = '/?'. $this->httpBuildQuery( $queryString );
         }
         $length = strlen( $data );
         $cmd =  "POST {$this->location}/{$type}{$queryPart} HTTP/1.1\n";
@@ -424,7 +424,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             $queryFlags['facet'] = 'true';
             $queryFlags['facet.mincount'] = 1;
             $queryFlags['facet.sort'] = 'false';
-            $queryFlags['facet.field'] = join( ' ', $facetFieldList );
+            $queryFlags['facet.field'] = $facetFieldList;
         }
         if ( count( $order ) )
         {
@@ -465,6 +465,24 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         return new ezcSearchResultDocument( $document->score, $obj );
     }
 
+    private function httpBuildQuery($query)
+    {
+        $queryString = array();
+        foreach($query as $key => $value){
+            // Multiple values for the same key should be duplicated in the query string
+            if(is_array($value)){
+                foreach($value as $subValue)
+                    $queryString[] = http_build_query(array($key=>$subValue));
+
+                unset($query[$key]);
+            }
+        }
+
+        if(!empty($query))
+            $queryString[] = http_build_query($query);
+
+        return implode("&",$queryString);
+    }
     /**
      * Converts a raw solr result into a document using the definition $def
      *
@@ -650,7 +668,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $offset = $query->offset;
         $order = $query->orderByClauses;
 
-        return http_build_query( $this->buildQuery( $queryWord, '', array(), $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order ) );
+        return $this->httpBuildQuery( $this->buildQuery( $queryWord, '', array(), $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order ) );
     }
 
     /**

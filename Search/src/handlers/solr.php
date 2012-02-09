@@ -738,7 +738,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
                     }
                     catch ( Exception $e )
                     {
-                        throw new ezcSearchInvalidValueException( $type, $value, $e->getMessage() );
+                        throw new ezcSearchInvalidValueException( $type, $value );
                     }
                     $value = $d->format( 'U' );
                 }

@@ -11,9 +11,9 @@ class ezcSearchInvalidValueException extends ezcSearchException
      * @param string $extraMsg
      * @return void
      */
-    public function __construct( $type, $value, $flag )
+    public function __construct( $type, $value, $flag = null)
     {
-        $message = "The field type '$type' has an invalid value '$value' with '$flag'.";
+        $message = "The field type '$type' has an invalid value '$value'".($flag?" with $flag.":"");
         parent::__construct( $message );
     }
 }

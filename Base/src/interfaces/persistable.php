@@ -47,6 +47,13 @@ interface ezcBasePersistable
     public function getState();
 
     /**
+     * Returns the id of the object.
+     *
+     * @return mixed
+     */
+    public function getId();
+
+    /**
      * Accepts an array containing data for one or more of the class' properties.
      *
      * @param array $properties

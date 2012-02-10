@@ -392,7 +392,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      * @param array(string=>string) $order
      * @return array
      */
-    private function buildQuery( $queryWord, $defaultField, $searchFieldList = array(), $returnFieldList = array(), $highlightFieldList = array(), $facetFieldList = array(), $limit = null, $offset = false, $order = array(),$optionalFlags = array() )
+    private function buildQuery( $queryWord, $defaultField, $searchFieldList = array(), $returnFieldList = array(), $highlightFieldList = array(), $facetFieldList = array(), $limit = null, $offset = false, $order = array(),$filterWord = array(), $optionalFlags = array() )
     {
         if ( count( $searchFieldList ) > 0 )
         {
@@ -444,6 +444,10 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         }
         $queryFlags['start'] = $offset;
         $queryFlags['rows'] = $limit === null ? 999999 : $limit;
+        if ( count($filterWord) )
+        {
+            $queryFlags['fq'] = $filterWord;
+        }
 
         $queryFlags = array_merge($optionalFlags,$queryFlags);
 
@@ -582,9 +586,9 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      * @param array(string=>string) $order
      * @return stdClass
      */
-    public function search( $queryWord, $defaultField, $searchFieldList = array(), $returnFieldList = array(), $highlightFieldList = array(), $facetFieldList = array(), $limit = null, $offset = 0, $order = array(),$optionalFlags=array() )
+    public function search( $queryWord, $defaultField, $searchFieldList = array(), $returnFieldList = array(), $highlightFieldList = array(), $facetFieldList = array(), $limit = null, $offset = 0, $order = array(),$filterWord = array(), $optionalFlags=array() )
     {
-        $result = $this->sendRawGetCommand( 'select', $this->buildQuery( $queryWord, $defaultField, $searchFieldList, $returnFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$optionalFlags ) );
+        $result = $this->sendRawGetCommand( 'select', $this->buildQuery( $queryWord, $defaultField, $searchFieldList, $returnFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$filterWord,$optionalFlags ) );
         if ( ( $data = json_decode( $result ) ) === null )
         {
             throw new ezcSearchInvalidResultException( $result );
@@ -626,7 +630,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
                 $highlightFieldNames[] = $this->mapFieldType( $docProp, $definition->fields[$docProp]->type );
             }
             $query->select( $selectFieldNames );
-            $query->where( $query->eq( 'ezcsearch_type', $type ) );
+            $query->where( $query->eq( 'ezcsearch_type', $type ),true );
             $query->highlight( $highlightFieldNames );
         }
         return $query;
@@ -641,6 +645,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
     public function find( ezcSearchFindQuery $query )
     {
         $queryWord = join( ' AND ', $query->whereClauses );
+        $filterWord = $query->filterClauses;
         $resultFieldList = $query->resultFields;
         $highlightFieldList = $query->highlightFields;
         $facetFieldList = $query->facets;
@@ -649,7 +654,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $order = $query->orderByClauses;
         $optionalFlags = $query->optionalFlags;
 
-        $res = $this->search( $queryWord, '', array(), $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$optionalFlags );
+        $res = $this->search( $queryWord, '', array(), $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$filterWord, $optionalFlags );
         return $this->createResponseFromData( $query->getDefinition(), $res );
     }
 
@@ -663,6 +668,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
     public function getQuery( ezcSearchQuerySolr $query )
     {
         $queryWord = join( ' AND ', $query->whereClauses );
+        $filterWord = $query->filterClauses;
         $resultFieldList = $query->resultFields;
         $highlightFieldList = $query->highlightFields;
         $facetFieldList = $query->facets;
@@ -670,7 +676,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $offset = $query->offset;
         $order = $query->orderByClauses;
 
-        return $this->httpBuildQuery( $this->buildQuery( $queryWord, '', array(), $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order ) );
+        return $this->httpBuildQuery( $this->buildQuery( $queryWord, '', array() , $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$filterWord,$optionalFlags ) );
     }
 
     /**
@@ -994,7 +1000,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         if ( $type )
         {
             $selectFieldNames = array();
-            $query->where( $query->eq( 'ezcsearch_type', $type ) );
+            $query->where( $query->eq( 'ezcsearch_type', $type ),true );
         }
         return $query;
     }

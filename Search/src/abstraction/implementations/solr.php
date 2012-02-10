@@ -54,6 +54,13 @@ class ezcSearchQuerySolr implements ezcSearchFindQuery
     public $whereClauses;
 
     /**
+     * Holds all the search clauses that will be used to create the filter queries.
+     *
+     * @var array(string)
+     */
+    public $filterClauses;
+
+    /**
      * Holds all the order by clauses that will be used to create the search query.
      *
      * @var array(string)
@@ -130,6 +137,7 @@ class ezcSearchQuerySolr implements ezcSearchFindQuery
         $this->resultFields = array();
         $this->highlightFields = array();
         $this->whereClauses = array();
+        $this->filterClauses = array();
         $this->limit = null;
         $this->offset = 0;
         $this->facets = array();
@@ -224,11 +232,14 @@ class ezcSearchQuerySolr implements ezcSearchFindQuery
      * Adds a select/filter statement to the query
      *
      * @param string $clause
+     * @param boolean $filterClause
      * @return ezcSearchQuerySolr
      */
-    public function where( $clause )
+    public function where( $clause,$filterClause = false )
     {
-        $this->whereClauses[] = $clause;
+        if($filterClause) $this->filterClauses[] = $clause;
+        else $this->whereClauses[] = $clause;
+
         return $this;
     }
 

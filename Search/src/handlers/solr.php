@@ -394,19 +394,17 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      */
     private function buildQuery( $queryWord, $defaultField, $searchFieldList = array(), $returnFieldList = array(), $highlightFieldList = array(), $facetFieldList = array(), $limit = null, $offset = false, $order = array(),$filterWord = array(), $optionalFlags = array() )
     {
+        $queryFlags = array( 'wt' => 'json', 'df' => $defaultField,'q.alt' => '*:*','defType' => 'dismax' );
+
         if ( count( $searchFieldList ) > 0 )
         {
-            $queryString = '';
-            foreach ( $searchFieldList as $searchField )
-            {
-                $queryString .= "$searchField:$queryWord ";
-            }
+            $queryFlags['qf'] = implode(' ',$searchFieldList);
         }
-        else
+
+        if(!empty($queryWord))
         {
-            $queryString = $queryWord;
+            $queryFlags['q'] = $queryWord;
         }
-        $queryFlags = array( 'q' => $queryString, 'wt' => 'json', 'df' => $defaultField );
 
         $returnFieldList[] = 'score';
         $queryFlags['fl'] = join( ' ', $returnFieldList );
@@ -644,8 +642,9 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      */
     public function find( ezcSearchFindQuery $query )
     {
-        $queryWord = join( ' AND ', $query->whereClauses );
+        $queryWord = join( ' ', $query->whereClauses );
         $filterWord = $query->filterClauses;
+        $searchFields = $query->searchFields;
         $resultFieldList = $query->resultFields;
         $highlightFieldList = $query->highlightFields;
         $facetFieldList = $query->facets;
@@ -654,7 +653,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $order = $query->orderByClauses;
         $optionalFlags = $query->optionalFlags;
 
-        $res = $this->search( $queryWord, '', array(), $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$filterWord, $optionalFlags );
+        $res = $this->search( $queryWord, '', $searchFields, $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$filterWord, $optionalFlags );
         return $this->createResponseFromData( $query->getDefinition(), $res );
     }
 
@@ -667,16 +666,18 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      */
     public function getQuery( ezcSearchQuerySolr $query )
     {
-        $queryWord = join( ' AND ', $query->whereClauses );
+        $queryWord = join( ' ', $query->whereClauses );
         $filterWord = $query->filterClauses;
+        $searchFields = $query->searchFields;
         $resultFieldList = $query->resultFields;
         $highlightFieldList = $query->highlightFields;
         $facetFieldList = $query->facets;
         $limit = $query->limit;
         $offset = $query->offset;
         $order = $query->orderByClauses;
+        $optionalFlags = $query->optionalFlags;
 
-        return $this->httpBuildQuery( $this->buildQuery( $queryWord, '', array() , $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$filterWord,$optionalFlags ) );
+        return $this->httpBuildQuery( $this->buildQuery( $queryWord, '',$searchFields , $resultFieldList, $highlightFieldList, $facetFieldList, $limit, $offset, $order,$filterWord,$optionalFlags ) );
     }
 
     /**

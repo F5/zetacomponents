@@ -100,6 +100,13 @@ class ezcSearchQuerySolr implements ezcSearchFindQuery
     public $optionalFlags;
 
     /**
+     * Holds all the search fields to send to Solr
+     *
+     * @var array(string)
+     */
+    public $searchFields;
+
+    /**
      * Holds the search handler for which this query is built.
      *
      * @var ezcSearchHandler
@@ -140,6 +147,7 @@ class ezcSearchQuerySolr implements ezcSearchFindQuery
         $this->filterClauses = array();
         $this->limit = null;
         $this->offset = 0;
+        $this->searchFields = array();
         $this->facets = array();
     }
 
@@ -290,6 +298,16 @@ class ezcSearchQuerySolr implements ezcSearchFindQuery
     {
         $field = $this->handler->mapFieldType( $facet, $this->definition->fields[$facet]->type );
         $this->facets[] = $field;
+        return $this;
+    }
+
+    public function searchField( $field )
+    {
+        $field = trim( $field );
+
+        $this->checkIfFieldExists( $field );
+        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type );
+        $this->searchFields[] = $fieldName;
         return $this;
     }
 
@@ -476,4 +494,3 @@ class ezcSearchQuerySolr implements ezcSearchFindQuery
         return "$clause~";
     }
 }
-?>

@@ -146,7 +146,7 @@ class ezcSearchZendLuceneHandler implements ezcSearchHandler, ezcSearchIndexHand
         $attr = array();
         foreach ( $def->fields as $field )
         {
-            $fieldName = $this->mapFieldType( $field->field, $field->type );
+            $fieldName = $this->mapFieldType( $field->field, $field->type, $field->multi );
             if ( $field->inResult /*&& isset( $document->$fieldName ) */ )
             {
                 $attr[$field->field] = $this->mapFieldValuesForReturn( $field, $document->$fieldName );
@@ -245,12 +245,12 @@ class ezcSearchZendLuceneHandler implements ezcSearchHandler, ezcSearchIndexHand
             $selectFieldNames = array();
             foreach ( $definition->getSelectFieldNames() as $docProp )
             {
-                $selectFieldNames[] = $this->mapFieldType( $docProp, $definition->fields[$docProp]->type );
+                $selectFieldNames[] = $this->mapFieldType( $docProp, $definition->fields[$docProp]->type, $definition->fields[$docProp]->multi );
             }
             $highlightFieldNames = array();
             foreach ( $definition->getHighlightFieldNames() as $docProp )
             {
-                $highlightFieldNames[] = $this->mapFieldType( $docProp, $definition->fields[$docProp]->type );
+                $highlightFieldNames[] = $this->mapFieldType( $docProp, $definition->fields[$docProp]->type, $definition->fields[$docProp]->multi );
             }
             $query->select( $selectFieldNames );
             $query->where( $query->eq( 'ezcsearch_type', $type ) );
@@ -295,7 +295,7 @@ class ezcSearchZendLuceneHandler implements ezcSearchHandler, ezcSearchIndexHand
      * @param string $type
      * @return string
      */
-    public function mapFieldType( $name, $type )
+    public function mapFieldType( $name, $type,$multi = true )
     {
         return $name;
     }
@@ -571,7 +571,7 @@ class ezcSearchZendLuceneHandler implements ezcSearchHandler, ezcSearchIndexHand
     public function deleteById( $id, ezcSearchDocumentDefinition $definition )
     {
         $idProperty = $definition->idProperty;
-        $fieldName = $this->mapFieldType( $definition->fields[$idProperty]->field, $definition->fields[$idProperty]->type );
+        $fieldName = $this->mapFieldType( $definition->fields[$idProperty]->field, $definition->fields[$idProperty]->type, $definition->fields[$idProperty]->multi );
         $res = $this->search( "ezcsearch_type:{$definition->documentType} AND {$fieldName}:$id" );
         if ( count( $res ) == 1 )
         {
@@ -608,7 +608,7 @@ class ezcSearchZendLuceneHandler implements ezcSearchHandler, ezcSearchIndexHand
     public function findById( $id, ezcSearchDocumentDefinition $definition )
     {
         $idProperty = $definition->idProperty;
-        $fieldName = $this->mapFieldType( $definition->fields[$idProperty]->field, $definition->fields[$idProperty]->type );
+        $fieldName = $this->mapFieldType( $definition->fields[$idProperty]->field, $definition->fields[$idProperty]->type, $definition->fields[$idProperty]->multi);
         $res = $this->search( "{$fieldName}:$id" );
         if ( count( $res ) != 1 )
         {

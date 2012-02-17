@@ -255,7 +255,7 @@ class ezcSearchQueryZendLucene implements ezcSearchFindQuery
      */
     public function orderBy( $field, $type = ezcSearchQueryTools::ASC )
     {
-        $field = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type );
+        $field = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type, $this->definition->fields[$field]->multi );
         $this->orderByClauses[$field] = $type;
         return $this;
     }
@@ -270,7 +270,7 @@ class ezcSearchQueryZendLucene implements ezcSearchFindQuery
      */
     public function facet( $facet )
     {
-        $field = $this->handler->mapFieldType( $facet, $this->definition->fields[$facet]->type );
+        $field = $this->handler->mapFieldType( $facet, $this->definition->fields[$facet]->type, $this->definition->fields[$facet]->multi );
         $this->facets[] = $field;
         return $this;
     }
@@ -295,7 +295,7 @@ class ezcSearchQueryZendLucene implements ezcSearchFindQuery
         $this->checkIfFieldExists( $field );
         $fieldType = $this->definition->fields[$field]->type;
         $value = $this->handler->mapFieldValueForSearch( $fieldType, $value );
-        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type );
+        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type, $this->definition->fields[$field]->multi );
 
         $ret = "$fieldName:$value";
 
@@ -327,7 +327,7 @@ class ezcSearchQueryZendLucene implements ezcSearchFindQuery
         $fieldType = $this->definition->fields[$field]->type;
         $value1 = $this->handler->mapFieldValueForSearch( $fieldType, $value1 );
         $value2 = $this->handler->mapFieldValueForSearch( $fieldType, $value2 );
-        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type );
+        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type, $this->definition->fields[$field]->multi );
 
         $ret = "$fieldName:[$value1 TO $value2]";
 

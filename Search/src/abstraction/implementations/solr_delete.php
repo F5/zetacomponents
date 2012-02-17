@@ -144,7 +144,7 @@ class ezcSearchDeleteQuerySolr implements ezcSearchDeleteQuery
         $this->checkIfFieldExists( $field );
         $fieldType = $this->definition->fields[$field]->type;
         $value = $this->handler->mapFieldValueForSearch( $fieldType, $value );
-        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type );
+        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type, $this->definition->fields[$field]->multi );
 
         $ret = "$fieldName:$value";
 
@@ -172,7 +172,7 @@ class ezcSearchDeleteQuerySolr implements ezcSearchDeleteQuery
         $fieldType = $this->definition->fields[$field]->type;
         $value1 = $this->handler->mapFieldValueForSearch( $fieldType, $value1 );
         $value2 = $this->handler->mapFieldValueForSearch( $fieldType, $value2 );
-        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type );
+        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type, $this->definition->fields[$field]->multi );
 
         $ret = "$fieldName:[$value1 TO $value2]";
 

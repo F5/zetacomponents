@@ -460,7 +460,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $attr = array();
         foreach ( $def->fields as $field )
         {
-            $fieldName = $this->mapFieldType( $field->field, $field->type );
+            $fieldName = $this->mapFieldType( $field->field, $field->type,$field->multi );
             if ( $field->inResult && isset( $document->$fieldName ) )
             {
                 $attr[$field->field] = $this->mapFieldValuesForReturn( $field, $document->$fieldName );
@@ -536,7 +536,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
                 {
                     foreach ( $def->fields as $field )
                     {
-                        $fieldName = $this->mapFieldType( $field->field, $field->type );
+                        $fieldName = $this->mapFieldType( $field->field, $field->type,$field->multi );
                         if ( $field->highlight && isset( $response->highlighting->$id->$fieldName ) )
                         {
                             $document->highlight[$field->field] = $response->highlighting->$id->$fieldName;
@@ -552,7 +552,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             $facets = $response->facet_counts->facet_fields;
             foreach ( $def->fields as $field )
             {
-                $fieldName = $this->mapFieldType( $field->field, $field->type );
+                $fieldName = $this->mapFieldType( $field->field, $field->type,$field->multi );
                 if ( isset( $facets->$fieldName ) )
                 {
                     // sigh, stupid array format needs fixing
@@ -620,12 +620,12 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             $selectFieldNames = array();
             foreach ( $definition->getSelectFieldNames() as $docProp )
             {
-                $selectFieldNames[] = $this->mapFieldType( $docProp, $definition->fields[$docProp]->type );
+                $selectFieldNames[] = $this->mapFieldType( $docProp, $definition->fields[$docProp]->type,$definition->fields[$docProp]->multi );
             }
             $highlightFieldNames = array();
             foreach ( $definition->getHighlightFieldNames() as $docProp )
             {
-                $highlightFieldNames[] = $this->mapFieldType( $docProp, $definition->fields[$docProp]->type );
+                $highlightFieldNames[] = $this->mapFieldType( $docProp, $definition->fields[$docProp]->type,$definition->fields[$docProp]->multi );
             }
             $query->select( $selectFieldNames );
             $query->where( $query->eq( 'ezcsearch_type', $type ),true );
@@ -702,7 +702,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
      * @param string $type
      * @return string
      */
-    public function mapFieldType( $name, $type )
+    public function mapFieldType( $name, $type,$multi = true )
     {
         $map = array(
             ezcSearchDocumentDefinition::STRING => '_s',
@@ -713,7 +713,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             ezcSearchDocumentDefinition::FLOAT => '_d',
             ezcSearchDocumentDefinition::BOOLEAN => '_b',
         );
-        return $name . $map[$type];
+        return $name . $map[$type].($multi?'':'_sl');
     }
 
     /**
@@ -927,7 +927,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         }
         else
         {
-            $values = $this->mapFieldValueForReturn( $field->type, $values[0] );
+            $values = $this->mapFieldValueForReturn( $field->type, $values);
         }
         return $values;
     }
@@ -954,7 +954,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         $xml->startElement( 'doc' );
 
         $xml->startElement( 'field' );
-        $xml->writeAttribute( 'name', 'ezcsearch_type_s' );
+        $xml->writeAttribute( 'name', 'ezcsearch_type_s_sl' );
         $xml->text( $definition->documentType );
         $xml->endElement();
 
@@ -972,7 +972,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             foreach ( $value as $fieldValue )
             {
                 $xml->startElement( 'field' );
-                $xml->writeAttribute( 'name', $this->mapFieldType( $field->field, $field->type ) );
+                $xml->writeAttribute( 'name', $this->mapFieldType( $field->field, $field->type,$field->multi ) );
                 $xml->text( $fieldValue );
                 $xml->endElement();
             }
@@ -1049,7 +1049,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
     public function findById( $id, ezcSearchDocumentDefinition $definition )
     {
         $idProperty = $definition->idProperty;
-        $fieldName = $this->mapFieldType( $definition->fields[$idProperty]->field, $definition->fields[$idProperty]->type );
+        $fieldName = $this->mapFieldType( $definition->fields[$idProperty]->field, $definition->fields[$idProperty]->type,$definition->fields[$idProperty]->multi );
         $res = $this->search( "{$fieldName}:$id", $fieldName )->response->docs;
         if ( count( $res ) != 1 )
         {

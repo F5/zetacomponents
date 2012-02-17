@@ -567,6 +567,16 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             }
         }
 
+        // process facets queries
+        if ( isset( $response->facet_counts ) && isset( $response->facet_counts->facet_queries ) )
+        {
+            $facets = $response->facet_counts->facet_queries;
+            foreach ( get_object_vars($facets) as $query => $count )
+            {
+                $s->facet_queries[$query] = $count;
+            }
+        }
+
         return $s;
     }
 

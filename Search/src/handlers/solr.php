@@ -447,7 +447,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             $queryFlags['fq'] = $filterWord;
         }
 
-        $queryFlags = array_merge($optionalFlags,$queryFlags);
+        if( count($optionalFlags) ) $queryFlags = array_merge($optionalFlags,$queryFlags);
 
         return $queryFlags;
     }

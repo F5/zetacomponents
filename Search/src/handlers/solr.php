@@ -718,7 +718,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             ezcSearchDocumentDefinition::STRING => '_s',
             ezcSearchDocumentDefinition::TEXT => '_t',
             ezcSearchDocumentDefinition::HTML => '_t',
-            ezcSearchDocumentDefinition::DATE => '_l',
+            ezcSearchDocumentDefinition::DATE => '_dt',
             ezcSearchDocumentDefinition::INT => '_l',
             ezcSearchDocumentDefinition::FLOAT => '_d',
             ezcSearchDocumentDefinition::BOOLEAN => '_b',
@@ -742,21 +742,22 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             case ezcSearchDocumentDefinition::DATE:
                 if ( is_numeric( $value ) )
                 {
-                    $d = new DateTime( "@$value" );
-                    $value = $d->format( 'U' );
+                    $value = new DateTime( "@$value" );
                 }
-                else
+                else if(!($value instanceof DateTime))
                 {
                     try
                     {
-                        $d = new DateTime( $value );
+                        $value = new DateTime( $value );
                     }
                     catch ( Exception $e )
                     {
                         throw new ezcSearchInvalidValueException( $type, $value );
                     }
-                    $value = $d->format( 'U' );
                 }
+
+                $value->setTimezone(new DateTimeZone('UTC'));
+                $value = $value->format('Y-m-d') . 'T' . $value->format('H:i:s') . 'Z';
                 break;
 
             case ezcSearchDocumentDefinition::BOOLEAN:
@@ -808,21 +809,24 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             case ezcSearchDocumentDefinition::DATE:
                 if ( is_numeric( $value ) )
                 {
-                    $d = new DateTime( "@$value" );
-                    $value = $d->format( 'U' );
+                    $value = new DateTime( "@$value" );
+                    $value->setTimezone(new DateTimeZone('UTC'));
+                    $value = $value->format('Y-m-d') . 'T' . $value->format('H:i:s') . 'Z';
                 }
-                else
+                else if( '*' != $value && 'NOW' != $value)
                 {
                     try
                     {
-                        $d = new DateTime( $value );
+                        $value = new DateTime( $value );
                     }
                     catch ( Exception $e )
                     {
                         throw new ezcSearchInvalidValueException( $type, $value );
                     }
-                    $value = $d->format( 'U' );
+                    $value->setTimezone(new DateTimeZone('UTC'));
+                    $value = $value->format('Y-m-d') . 'T' . $value->format('H:i:s') . 'Z';
                 }
+
                 break;
 
             case ezcSearchDocumentDefinition::BOOLEAN:
@@ -847,7 +851,7 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
         switch ( $fieldType )
         {
             case ezcSearchDocumentDefinition::DATE:
-                $value = new DateTime( "@$value" );
+                $value = DateTime::createFromFormat("Y-m-d\TH:i:s\Z",$value,new DateTimeZone("UTC"));
                 break;
 
         }

@@ -363,7 +363,7 @@ class ezcSearchQuerySolr implements ezcSearchFindQuery
         $fieldType = $this->definition->fields[$field]->type;
         $value1 = $this->handler->mapFieldValueForSearch( $fieldType, $value1 );
         $value2 = $this->handler->mapFieldValueForSearch( $fieldType, $value2 );
-        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type, $this->definition->fields[$field]->type );
+        $fieldName = $this->handler->mapFieldType( $field, $this->definition->fields[$field]->type, $this->definition->fields[$field]->multi );
 
         $ret = "$fieldName:[$value1 TO $value2]";
 

@@ -577,6 +577,21 @@ class ezcSearchSolrHandler implements ezcSearchHandler, ezcSearchIndexHandler
             }
         }
 
+        // process more like this
+        if ( isset( $response->moreLikeThis ) && count( $response->moreLikeThis ))
+        {
+            foreach($response->moreLikeThis as $key => $documents ) {
+                if( isset( $documents->docs )){
+                    foreach ( $documents->docs as $document )
+                    {
+                        $resultDocument = $this->createDataForHit( $document, $def );
+
+                        $s->more_like_this[$key][$resultDocument->document->getId()] = $resultDocument;
+                    }
+                }
+            }
+        }
+
         return $s;
     }
 

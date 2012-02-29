@@ -90,6 +90,8 @@ class ezcSearchResult
 
     public $facet_queries;
 
+    public $more_like_this;
+
     /**
      * Contructs a new ezcSearchResult.
      *
@@ -101,7 +103,7 @@ class ezcSearchResult
      * @param string $error
      * @param array(string=>array(mixed)) $facets
      */
-    public function __construct( $status =  0, $queryTime =  0, $resultCount =  0, $start =  0, $documents =  array(), $error =  '', $facets = array(),$facet_queries = array() )
+    public function __construct( $status =  0, $queryTime =  0, $resultCount =  0, $start =  0, $documents =  array(), $error =  '', $facets = array(),$facet_queries = array(), $more_like_this = array() )
     {
         $this->status = $status;
         $this->queryTime = $queryTime;
@@ -111,6 +113,7 @@ class ezcSearchResult
         $this->error = $error;
         $this->facets = $facets;
         $this->facet_queries = $facet_queries;
+        $this->more_like_this = $more_like_this;
     }
 
     /**
